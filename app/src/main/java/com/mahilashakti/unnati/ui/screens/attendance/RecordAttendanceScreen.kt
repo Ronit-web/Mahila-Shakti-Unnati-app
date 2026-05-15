@@ -1,16 +1,24 @@
 package com.mahilashakti.unnati.ui.screens.attendance
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Save
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.mahilashakti.unnati.data.model.AttendanceEntity
+import com.mahilashakti.unnati.ui.components.ModernCard
+import com.mahilashakti.unnati.ui.components.PrimaryButton
 import com.mahilashakti.unnati.viewmodel.AttendanceViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -24,47 +32,63 @@ fun RecordAttendanceScreen(
     
     LaunchedEffect(members) {
         if (presentStatusMap.isEmpty()) {
-            members.forEach { presentStatusMap[it.id] = true } // default all to present
+            members.forEach { presentStatusMap[it.id] = true }
         }
     }
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text("Record Attendance") },
+            CenterAlignedTopAppBar(
+                title = { Text("Meeting Attendance", style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(Icons.Filled.ArrowBack, contentDescription = "Back")
                     }
-                }
+                },
+                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.background
+                )
             )
         },
         bottomBar = {
-            Surface(tonalElevation = 8.dp) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
+            Surface(
+                tonalElevation = 12.dp,
+                shadowElevation = 12.dp,
+                shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
+            ) {
+                Column(modifier = Modifier.padding(24.dp)) {
                     val presentCount = members.count { presentStatusMap[it.id] == true }
-                    Text("Present: $presentCount / ${members.size}", style = MaterialTheme.typography.titleMedium)
-                    
-                    Button(onClick = {
-                        val currentTime = System.currentTimeMillis()
-                        val entries = members.map { member ->
-                            AttendanceEntity(
-                                memberId = member.id,
-                                date = currentTime,
-                                isPresent = presentStatusMap[member.id] ?: true
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text("Attendance Summary", style = MaterialTheme.typography.bodyLarge)
+                        Text(
+                            "$presentCount / ${members.size} Present", 
+                            style = MaterialTheme.typography.titleLarge.copy(
+                                fontWeight = FontWeight.ExtraBold,
+                                color = MaterialTheme.colorScheme.primary
                             )
-                        }
-                        viewModel.recordBulkAttendance(entries)
-                        onNavigateBack()
-                    }) {
-                        Text("Save All")
+                        )
                     }
+                    Spacer(modifier = Modifier.height(16.dp))
+                    PrimaryButton(
+                        text = "Save Attendance",
+                        icon = Icons.Filled.Save,
+                        onClick = {
+                            val currentTime = System.currentTimeMillis()
+                            val entries = members.map { member ->
+                                AttendanceEntity(
+                                    memberId = member.id,
+                                    date = currentTime,
+                                    isPresent = presentStatusMap[member.id] ?: true
+                                )
+                            }
+                            viewModel.recordBulkAttendance(entries)
+                            onNavigateBack()
+                        }
+                    )
                 }
             }
         }
@@ -73,35 +97,49 @@ fun RecordAttendanceScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .padding(16.dp)
+                .background(MaterialTheme.colorScheme.background),
+            contentPadding = PaddingValues(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
+            item {
+                Text(
+                    "Roll Call", 
+                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                    modifier = Modifier.padding(start = 8.dp, bottom = 4.dp)
+                )
+            }
             items(members) { member ->
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 4.dp),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+                val isPresent = presentStatusMap[member.id] ?: true
+                ModernCard(
+                    containerColor = if (isPresent) MaterialTheme.colorScheme.surface else MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.05f)
                 ) {
                     Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
+                        modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Column {
-                            Text(member.name, style = MaterialTheme.typography.bodyLarge)
-                            Text(if (presentStatusMap[member.id] == true) "Present" else "Absent", 
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = if (presentStatusMap[member.id] == true) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error)
+                            Text(
+                                member.name, 
+                                style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.SemiBold)
+                            )
+                            Text(
+                                if (isPresent) "Present" else "Absent",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = if (isPresent) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
+                            )
                         }
                         Switch(
-                            checked = presentStatusMap[member.id] ?: true,
-                            onCheckedChange = { isPresent -> presentStatusMap[member.id] = isPresent }
+                            checked = isPresent,
+                            onCheckedChange = { presentStatusMap[member.id] = it },
+                            thumbContent = if (isPresent) {
+                                { Icon(Icons.Filled.CheckCircle, null, Modifier.size(SwitchDefaults.IconSize)) }
+                            } else null
                         )
                     }
                 }
             }
+            item { Spacer(modifier = Modifier.height(32.dp)) }
         }
     }
 }

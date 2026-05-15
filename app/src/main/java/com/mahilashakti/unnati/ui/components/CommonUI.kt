@@ -11,6 +11,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -20,6 +21,8 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.mahilashakti.unnati.ui.theme.GradientEnd
+import com.mahilashakti.unnati.ui.theme.GradientStart
 
 /**
  * Primary Gradient Button for main actions
@@ -48,10 +51,7 @@ fun PrimaryButton(
                 .fillMaxSize()
                 .background(
                     brush = Brush.horizontalGradient(
-                        colors = listOf(
-                            MaterialTheme.colorScheme.primary,
-                            MaterialTheme.colorScheme.secondary
-                        )
+                        colors = listOf(GradientStart, GradientEnd)
                     ),
                     shape = RoundedCornerShape(16.dp)
                 ),
@@ -91,24 +91,87 @@ fun PrimaryButton(
 fun ModernCard(
     modifier: Modifier = Modifier,
     onClick: (() -> Unit)? = null,
+    containerColor: Color = MaterialTheme.colorScheme.surface,
     content: @Composable ColumnScope.() -> Unit
 ) {
     ElevatedCard(
         onClick = onClick ?: {},
         enabled = onClick != null,
         modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(20.dp),
+        shape = RoundedCornerShape(24.dp),
         colors = CardDefaults.elevatedCardColors(
-            containerColor = MaterialTheme.colorScheme.surface
+            containerColor = containerColor
         ),
         elevation = CardDefaults.elevatedCardElevation(defaultElevation = 2.dp)
     ) {
         Column(
             modifier = Modifier
                 .padding(16.dp)
-                .fillMaxWidth()
-        ) {
-            content()
+                .fillMaxWidth(),
+            content = content
+        )
+    }
+}
+
+/**
+ * Branded Header Card for Dashboards
+ */
+@Composable
+fun BrandedHeaderCard(
+    title: String,
+    subtitle: String,
+    value: String? = null,
+    icon: ImageVector? = null
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(160.dp)
+            .clip(RoundedCornerShape(28.dp))
+            .background(
+                brush = Brush.linearGradient(
+                    colors = listOf(GradientStart, GradientEnd)
+                )
+            )
+            .padding(24.dp)
+    ) {
+        Column(modifier = Modifier.align(Alignment.CenterStart)) {
+            Text(
+                text = title,
+                color = Color.White.copy(alpha = 0.8f),
+                style = MaterialTheme.typography.bodyLarge
+            )
+            if (value != null) {
+                Text(
+                    text = value,
+                    color = Color.White,
+                    style = MaterialTheme.typography.displaySmall.copy(fontWeight = FontWeight.Bold)
+                )
+            } else {
+                Text(
+                    text = subtitle,
+                    color = Color.White,
+                    style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold)
+                )
+            }
+            if (value != null) {
+                Text(
+                    text = subtitle,
+                    color = Color.White.copy(alpha = 0.7f),
+                    style = MaterialTheme.typography.labelMedium
+                )
+            }
+        }
+        if (icon != null) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = Color.White.copy(alpha = 0.15f),
+                modifier = Modifier
+                    .size(90.dp)
+                    .align(Alignment.CenterEnd)
+                    .offset(x = 20.dp, y = 20.dp)
+            )
         }
     }
 }

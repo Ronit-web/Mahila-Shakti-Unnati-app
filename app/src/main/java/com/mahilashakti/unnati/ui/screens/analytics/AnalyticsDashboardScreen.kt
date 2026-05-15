@@ -1,17 +1,23 @@
 package com.mahilashakti.unnati.ui.screens.analytics
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.TrendingUp
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.mahilashakti.unnati.ui.components.BrandedHeaderCard
 import com.mahilashakti.unnati.ui.components.ModernBarChart
+import com.mahilashakti.unnati.ui.components.ModernCard
 import com.mahilashakti.unnati.ui.components.ModernLineChart
 import com.mahilashakti.unnati.viewmodel.AnalyticsViewModel
 
@@ -25,13 +31,16 @@ fun AnalyticsDashboardScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text("Insights & Analytics") },
+            CenterAlignedTopAppBar(
+                title = { Text("Insights", style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(Icons.Filled.ArrowBack, contentDescription = "Back")
                     }
-                }
+                },
+                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.background
+                )
             )
         }
     ) { padding ->
@@ -39,32 +48,41 @@ fun AnalyticsDashboardScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .padding(16.dp)
+                .background(MaterialTheme.colorScheme.background)
                 .verticalScroll(rememberScrollState())
+                .padding(horizontal = 16.dp)
         ) {
+            BrandedHeaderCard(
+                title = "Group Performance",
+                subtitle = "Growth & Engagement Trends",
+                icon = Icons.AutoMirrored.Filled.TrendingUp
+            )
+
+            Spacer(modifier = Modifier.height(24.dp))
+
             // Savings Growth Chart
-            AnalyticsCard(title = "Savings Growth (Last 6 Months)") {
+            AnalyticsSection(title = "Savings Growth (Last 6 Months)") {
                 ModernLineChart(
                     data = state.savingsOverTime,
                     modifier = Modifier.fillMaxWidth().height(200.dp)
                 )
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(24.dp))
 
             // Attendance Rate Chart
-            AnalyticsCard(title = "Attendance Rate (%)") {
+            AnalyticsSection(title = "Attendance Trends (%)") {
                 ModernLineChart(
                     data = state.attendanceTrends,
                     modifier = Modifier.fillMaxWidth().height(200.dp),
-                    lineColor = MaterialTheme.colorScheme.tertiary
+                    lineColor = MaterialTheme.colorScheme.secondary
                 )
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(24.dp))
 
             // Loan Status Comparison
-            AnalyticsCard(title = "Loan Status Overview") {
+            AnalyticsSection(title = "Loan Disbursement Overview") {
                 val loanData = state.loanStats.map { (status, count) -> 
                     com.mahilashakti.unnati.viewmodel.ChartDataPoint(status, count.toFloat())
                 }
@@ -73,19 +91,21 @@ fun AnalyticsDashboardScreen(
                     modifier = Modifier.fillMaxWidth().height(200.dp)
                 )
             }
+            
+            Spacer(modifier = Modifier.height(32.dp))
         }
     }
 }
 
 @Composable
-fun AnalyticsCard(title: String, content: @Composable () -> Unit) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
-    ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Text(title, style = MaterialTheme.typography.titleMedium)
-            Spacer(modifier = Modifier.height(16.dp))
+fun AnalyticsSection(title: String, content: @Composable () -> Unit) {
+    Column {
+        Text(
+            text = title, 
+            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+            modifier = Modifier.padding(start = 8.dp, bottom = 12.dp)
+        )
+        ModernCard {
             content()
         }
     }
