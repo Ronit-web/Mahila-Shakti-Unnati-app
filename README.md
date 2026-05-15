@@ -67,8 +67,9 @@ The application features a **modern, premium interface** built with Jetpack Comp
 
 ### 3. Gemini AI Setup
 1. Get an API key from [Google AI Studio](https://aistudio.google.com/).
-2. Open `app/src/main/java/com/mahilashakti/unnati/utils/Constants.kt`.
-3. Replace the `GEMINI_API_KEY` with your actual key.
+2. Open `local.properties` in the project root.
+3. Add the following line: `GEMINI_API_KEY=your_actual_key_here`.
+4. The project will automatically use this key via `BuildConfig` (secured by Secrets Gradle Plugin).
 
 ### 4. Firestore Security Rules
 Deploy the following rules for basic role-based isolation:

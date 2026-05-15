@@ -15,8 +15,9 @@ Follow these steps to deploy and run the **Mahila-Shakti Unnati** application.
 ## 2. Gemini AI Configuration
 1.  Visit the [Google AI Studio](https://aistudio.google.com/).
 2.  Generate a new **API Key**.
-3.  In the project, navigate to `com.mahilashakti.unnati.utils.Constants`.
-4.  Paste your key in the `GEMINI_API_KEY` field.
+3.  Open `local.properties` in your project root.
+4.  Add the line: `GEMINI_API_KEY=your_actual_key_here`.
+    *(Note: This key is injected via BuildConfig and is not committed to Git.)*
 
 ## 3. Firestore Security Rules
 Use the following rules to ensure role-based data isolation:
